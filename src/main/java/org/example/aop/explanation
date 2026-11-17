@@ -1,0 +1,191 @@
+This is one of the most common Spring AOP interview questions.
+
+Many developers confuse Pointcut, Advice, and Around Advice.
+
+Simple Analogy
+
+Suppose there's a security guard at a company.
+
+Pointcut = Which doors should be monitored?
+Advice = What action should be performed?
+Around Advice = A special action that can control the entire entry/exit process.
+1. Pointcut
+
+A Pointcut defines WHERE AOP should be applied.
+
+Example:
+
+Java
+@Pointcut("execution(* com.example.service.*.*(..))")
+public void serviceMethods() {}
+
+This does nothing by itself.
+
+It simply says:
+
+Apply AOP to all methods in the service package.
+
+Think Interview Answer
+Plain Text
+Pointcut = WHERE to apply AOP
+2. Advice
+
+An Advice defines WHAT action should be executed when the pointcut matches.
+
+Examples:
+
+Java
+@Before("serviceMethods()")
+public void logBefore() {
+System.out.println("Before Method");
+}
+Java
+@After("serviceMethods()")
+public void logAfter() {
+System.out.println("After Method");
+}
+Java
+@AfterReturning("serviceMethods()")
+Java
+@AfterThrowing("serviceMethods()")
+Think Interview Answer
+Plain Text
+Advice = WHAT action to perform
+3. Around Advice
+
+@Around is also an Advice, but it is the most powerful one.
+
+Java
+@Around("serviceMethods()")
+public Object monitor(ProceedingJoinPoint jp)
+throws Throwable {
+ 
+System.out.println("Before");
+ 
+Object result = jp.proceed();
+ 
+System.out.println("After");
+ 
+return result;
+}
+
+Output:
+
+Plain Text
+Before
+Business Method
+After
+
+Unlike other advices, Around can:
+
+✅ Execute before method
+
+✅ Execute after method
+
+✅ Skip method execution
+
+✅ Modify return value
+
+✅ Handle exceptions
+
+✅ Measure execution time
+
+Visual Flow
+Plain Text
+Client
+|
+v
+Pointcut matches?
+|
+v
+Advice executes
+|
+v
+Business Method
+Complete Example
+Pointcut
+Java
+@Pointcut("execution(* com.example.service.*.*(..))")
+public void serviceMethods() {}
+Advice
+Java
+@Before("serviceMethods()")
+public void log() {
+System.out.println("Logging");
+}
+
+Execution:
+
+Plain Text
+Logging
+saveEmployee()
+Around Advice
+Java
+@Around("serviceMethods()")
+public Object around(ProceedingJoinPoint jp)
+throws Throwable {
+ 
+System.out.println("Start");
+ 
+Object result = jp.proceed();
+ 
+System.out.println("End");
+ 
+return result;
+}
+without @pointcut we can directly use @before right?
+Exactly ✅
+
+@Pointcut is optional.
+
+You can directly write:
+
+@Before("execution(* com.example.service.*.*(..))")
+public void logBefore() {
+    System.out.println("Before Method");
+}
+This works perfectly fine.
+
+Why use @Pointcut then?
+
+To avoid repeating the same expression multiple times.
+
+Without Pointcut:
+
+Java
+@Before("execution(* com.example.service.*.*(..))")
+ 
+@After("execution(* com.example.service.*.*(..))")
+ 
+@AfterReturning("execution(* com.example.service.*.*(..))")
+ 
+@AfterThrowing("execution(* com.example.service.*.*(..))")
+
+Notice the same expression repeated 4 times.
+
+With Pointcut
+Java
+@Pointcut("execution(* com.example.service.*.*(..))")
+public void serviceMethods() {
+}
+
+Now reuse it:
+
+Java
+@Before("serviceMethods()")
+public void before() {
+}
+ 
+@After("serviceMethods()")
+public void after() {
+}
+ 
+@AfterReturning("serviceMethods()")
+public void afterReturning() {
+}
+ 
+@AfterThrowing("serviceMethods()")
+public void afterThrowing() {
+}
+
+Much cleaner.

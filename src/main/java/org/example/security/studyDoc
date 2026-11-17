@@ -1,0 +1,288 @@
+Module 1: Security Basics
+What is Spring Security?
+
+Spring Security is a framework used to secure Spring applications by providing:
+
+Authentication
+Authorization
+Password Encryption
+Session Management
+JWT Security
+CSRF Protection
+Authentication vs Authorization
+Authentication
+
+Verifies who the user is.
+
+Username + Password
+
+Example:
+
+admin/admin123
+Authorization
+
+Determines what the user can access.
+
+ADMIN -> CREATE USER
+USER -> READ USER
+
+Module 2: Spring Security Architecture
+
+Client Request
+|
+Security Filter Chain
+|
+AuthenticationManager
+|
+AuthenticationProvider
+|
+UserDetailsService
+|
+Database
+
+Interview Answer
+
+SecurityFilterChain intercepts every request.
+AuthenticationManager delegates authentication.
+AuthenticationProvider validates credentials.
+UserDetailsService loads user information from DB.
+PasswordEncoder verifies passwords.
+
+Module 3: UserDetailsService
+
+Purpose:
+
+Load user information from database.
+
+Example:
+
+Java
+@Service
+public class CustomUserDetailsService
+implements UserDetailsService {
+ 
+@Autowired
+UserRepository repository;
+ 
+@Override
+public UserDetails loadUserByUsername(
+String username) {
+ 
+User user =
+repository.findByUsername(username)
+.orElseThrow();
+ 
+return org.springframework.security
+ .core.userdetails.User
+.builder()
+.username(user.getUsername())
+.password(user.getPassword())
+.roles(user.getRole())
+.build();
+}
+}
+Module 4: Password Encoder
+Why?
+
+Never store passwords as plain text.
+
+Bad:
+
+Plain Text
+admin123
+
+Good:
+
+Plain Text
+$2a$10$ADSJDKFHSDKJHFKSDF...
+ 
+BCrypt
+Java
+@Bean
+public PasswordEncoder encoder() {
+return new BCryptPasswordEncoder();
+}
+
+Encoding:
+
+Java
+encoder.encode("admin123");
+
+Validating:
+
+Java
+encoder.matches(
+rawPassword,
+encodedPassword
+);
+Module 5: SecurityFilterChain
+
+Spring Security 6 Standard
+
+Java
+@Bean
+public SecurityFilterChain securityFilterChain(
+HttpSecurity http) throws Exception {
+ 
+return http
+.csrf(csrf -> csrf.disable())
+.authorizeHttpRequests(auth -> auth
+.requestMatchers(
+"/auth/**")
+.permitAll()
+ 
+.anyRequest()
+.authenticated()
+)
+.build();
+}
+Module 6: Roles and Authorities
+Roles
+Plain Text
+ROLE_ADMIN
+ 
+ROLE_USER
+Authorities
+Plain Text
+READ
+ 
+WRITE
+ 
+DELETE
+
+Configuration:
+
+Java
+.hasRole("ADMIN")
+Java
+.hasAuthority("DELETE")
+Module 7: Session Authentication
+Plain Text
+Login
+↓
+Create Session
+↓
+Store Session Id
+↓
+Validate Session
+
+Pros:
+
+Plain Text
+Simple
+ 
+
+Cons:
+
+Plain Text
+Not good for Microservices
+Module 8: JWT Authentication
+
+Flow:
+
+Plain Text
+User Login
+↓
+Username Password
+↓
+Authentication
+↓
+Generate JWT
+↓
+Return JWT
+↓
+Client sends JWT
+
+Header:
+
+Plain Text
+Authorization: Bearer <token>
+JWT Structure
+Plain Text
+xxxx.yyyy.zzzz
+
+Header
+
+JSON
+{
+"alg":"HS256"
+}
+
+Payload
+
+JSON
+{
+"sub":"admin",
+"role":"ADMIN"
+}
+
+Signature
+
+Plain Text
+Encrypted Portion
+Module 9: CSRF
+
+Cross-Site Request Forgery
+
+Example:
+
+Plain Text
+User logged into bank site.
+ 
+Attacker sends fake request.
+ 
+Browser automatically sends cookies.
+ 
+
+Disable for JWT APIs:
+
+Java
+http.csrf(csrf ->
+csrf.disable());
+Module 10: Method Level Security
+
+Enable:
+
+Java
+@EnableMethodSecurity
+
+Usage:
+
+Java
+@PreAuthorize(
+"hasRole('ADMIN')"
+)
+public void deleteUser() {
+ 
+}
+Top Interview Questions
+Freshers
+Plain Text
+Authentication vs Authorization
+ 
+What is UserDetailsService?
+ 
+Why PasswordEncoder?
+ 
+What is BCrypt?
+ 
+What is SecurityFilterChain?
+ 
+What is CSRF?
+Experienced
+Plain Text
+Explain Security Filter Chain.
+ 
+AuthenticationManager flow.
+ 
+JWT Authentication flow.
+ 
+Role vs Authority.
+ 
+JWT vs Session.
+ 
+How JWT works internally?
+ 
+How refresh token works?
+ 
+How to secure microservices?
